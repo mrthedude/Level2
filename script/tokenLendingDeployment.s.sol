@@ -6,16 +6,26 @@ import {tokenLending} from "../src/tokenLending.sol";
 import {token} from "../src/token.sol";
 import {HelperConfig} from "../script/HelperConfig.s.sol";
 
-contract tokenLendingScript is Script {
-    function run() public returns (token, tokenLending) {
+contract tokenDeployer is Script {
+    HelperConfig helperConfig = new HelperConfig();
+    address addi = helperConfig.getOwnerAddress();
+
+    function runToken() public returns (token) {
+        token myToken = new token(addi);
+        return myToken;
+    }
+}
+
+contract tokenLendingScript is Script, tokenDeployer {
+    function run() public returns (tokenLending) {
         HelperConfig helperConfig = new HelperConfig();
         address addi = helperConfig.getOwnerAddress();
+        tokenDeployer deployToken = new tokenDeployer();
         vm.startBroadcast();
 
-        token myToken = new token();
-        tokenLending lendingContract = new tokenLending(address(myToken), addi);
+        tokenLending lendingContract = new tokenLending(address(deployToken.runToken()), addi);
 
         vm.stopBroadcast();
-        return (myToken, lendingContract);
+        return lendingContract;
     }
 }

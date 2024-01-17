@@ -26,7 +26,7 @@ import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 contract token is ERC20, Ownable {
-    constructor() ERC20("Level2", "LVL2") Ownable(msg.sender) {
-        _mint(msg.sender, 100 * 10 ** decimals());
+    constructor(address owner) ERC20("Level2", "LVL2") Ownable(owner) {
+        _mint(owner, 100 * 10 ** decimals());
     }
 }

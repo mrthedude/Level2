@@ -36,7 +36,6 @@ contract tokenLending {
     error cannotWithdrawMoreThanDeposited();
     error cannotWithdrawWithAnOpenBorrowingPosition();
     error cannotExceedMaximumCollateralRatio();
-    error notEnoughFundsInContract();
     error cannotRepayMoreThanBorrowedAmount();
     error contractCalledWithIncompatibleData();
     error onlyTheOwnerCanCallThisFunction();
@@ -157,10 +156,6 @@ contract tokenLending {
             revert cannotExceedMaximumCollateralRatio();
         }
 
-        if (i_token.balanceOf(address(this)) < amount) {
-            revert notEnoughFundsInContract();
-        }
-
         _borrowBalance[msg.sender] += amount;
         i_token.safeTransfer(msg.sender, amount);
     }
@@ -201,5 +196,13 @@ contract tokenLending {
 
     function getOwnerAddress() public view returns (address ownerAddress) {
         ownerAddress = address(_owner);
+    }
+
+    function getDepositBalance() public view returns (uint256 depositBalance) {
+        depositBalance = _depositBalance[msg.sender];
+    }
+
+    function getBorrowBalance() public view returns (uint256 borrowBalance) {
+        borrowBalance = _borrowBalance[msg.sender];
     }
 }
