@@ -177,7 +177,7 @@ contract tokenLending {
     /**
      * @notice Function used to transfer any Ether in the contract to the owner then emits an event
      */
-    function transferFunds() external onlyOwner returns (bool success) {
+    function transferFunds() external onlyOwner {
         if (address(this).balance == 0) {
             revert noEtherInContract();
         }
@@ -187,9 +187,11 @@ contract tokenLending {
             revert transferFundsFailed();
         }
         emit TransferredFundsToOwner();
-        return success;
     }
 
+    /**
+     * @notice Getter functions for contract variables and data
+     */
     function getTokenAddress() public view returns (address tokenAddress) {
         tokenAddress = address(i_token);
     }

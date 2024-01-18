@@ -1,66 +1,17 @@
 ## tokenLending: LEVEL 2 Challenges
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+**This is a basic lending and borrowing contract designed to accept/use a specified ERC20 token.**
 
-Foundry consists of:
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+The main contracts of this repo are:
 
-## Documentation
+-   **token.sol**: The ERC20 token that is deployed in tandem with the lending/borrowing contract and is the only ERC20 token that is compatible with the contract
 
-https://book.getfoundry.sh/
+-   **tokenLending.sol**: A basic lending and borrowing contract designed to be compatible only with the `token.sol` ERC20 contract
 
-## Usage
+-   **HelperConfig.s.sol**: Used to help automate deployment
 
-### Build
+-   **tokenLendingDeployment.s.sol**: Deployment contract used to deploy both the tokenLending.sol and token.sol contracts 
 
-```shell
-$ forge build
-```
+**test_tokenLending.t.sol**: Tests file for all the above listed contracts and their functionalities
 
-### Test
-
-```shell
-$ forge test
-```
-
-### Format
-
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```

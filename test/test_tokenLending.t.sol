@@ -93,7 +93,17 @@ contract testToken is Test, tokenLendingScript {
         vm.stopPrank();
     }
 
-    function testRevert_whenTryingToWithdrawWithBorrowPosition() public {}
+    function testRevert_whenTryingToWithdrawWithBorrowPosition() public {
+        address owner = lendingContract.getOwnerAddress();
+        myToken = token(lendingContract.getTokenAddress());
+        vm.startPrank(owner);
+        myToken.approve(address(lendingContract), 10e18);
+        lendingContract.depositToken(10e18);
+        lendingContract.borrowToken(1e18);
+        vm.expectRevert(tokenLending.cannotWithdrawWithAnOpenBorrowingPosition.selector);
+        lendingContract.withdrawToken(1e18);
+        vm.stopPrank();
+    }
 
     function testTokensAreTransferredToCallerAfterWithdraw() public {
         address owner = lendingContract.getOwnerAddress();
@@ -138,5 +148,100 @@ contract testToken is Test, tokenLendingScript {
         vm.expectRevert(tokenLending.cannotExceedMaximumCollateralRatio.selector);
         lendingContract.borrowToken(7.6e18);
         vm.stopPrank();
+    }
+
+    function testBorrowBalanceIncreases() public {
+        address owner = lendingContract.getOwnerAddress();
+        myToken = token(lendingContract.getTokenAddress());
+        vm.startPrank(owner);
+        myToken.approve(address(lendingContract), 10e18);
+        lendingContract.depositToken(10e18);
+        lendingContract.borrowToken(7.5e18);
+        assertEq(lendingContract.getBorrowBalance(), 7.5e18);
+        vm.stopPrank();
+    }
+
+    function testTokensBorrowedAreTransferredToCaller() public {
+        address owner = lendingContract.getOwnerAddress();
+        myToken = token(lendingContract.getTokenAddress());
+        vm.startPrank(owner);
+        myToken.approve(address(lendingContract), 10e18);
+        lendingContract.depositToken(10e18);
+        lendingContract.borrowToken(7.5e18);
+        assertEq(myToken.balanceOf(owner), 97.5e18);
+        vm.stopPrank();
+    }
+
+    ///////////// Testing repayToken /////////////
+    function testRevert_whenRepayAmountIsZero() public {
+        address owner = lendingContract.getOwnerAddress();
+        myToken = token(lendingContract.getTokenAddress());
+        vm.startPrank(owner);
+        myToken.approve(address(lendingContract), 10e18);
+        lendingContract.depositToken(10e18);
+        lendingContract.borrowToken(7.5e18);
+        vm.expectRevert(tokenLending.cannotBeZero.selector);
+        lendingContract.repayToken(0);
+        vm.stopPrank();
+    }
+
+    function testRevert_whenRepayAmountIsMoreThanBorrow() public {
+        address owner = lendingContract.getOwnerAddress();
+        myToken = token(lendingContract.getTokenAddress());
+        vm.startPrank(owner);
+        myToken.approve(address(lendingContract), 10e18);
+        lendingContract.depositToken(10e18);
+        lendingContract.borrowToken(7.5e18);
+        vm.expectRevert(tokenLending.cannotRepayMoreThanBorrowedAmount.selector);
+        lendingContract.repayToken(8e18);
+        vm.stopPrank();
+    }
+
+    function testRepayAmountIsSentToContract() public {
+        address owner = lendingContract.getOwnerAddress();
+        myToken = token(lendingContract.getTokenAddress());
+        vm.startPrank(owner);
+        myToken.approve(address(lendingContract), 17.5e18);
+        lendingContract.depositToken(10e18);
+        lendingContract.borrowToken(7.5e18);
+        lendingContract.repayToken(7.5e18);
+        assertEq(myToken.balanceOf(address(lendingContract)), 10e18);
+        vm.stopPrank();
+    }
+
+    function testUserBorrowBalanceDecreasesByRepayAmount() public {
+        address owner = lendingContract.getOwnerAddress();
+        myToken = token(lendingContract.getTokenAddress());
+        vm.startPrank(owner);
+        myToken.approve(address(lendingContract), 17.5e18);
+        lendingContract.depositToken(10e18);
+        lendingContract.borrowToken(7.5e18);
+        lendingContract.repayToken(7.5e18);
+        assertEq(lendingContract.getBorrowBalance(), 0);
+        vm.stopPrank();
+    }
+
+    ///////////// Testing transferFunds /////////////
+    function testRevert_whenCallerIsNotOwner() public {
+        address owner = lendingContract.getOwnerAddress();
+        myToken = token(lendingContract.getTokenAddress());
+        vm.deal(owner, 10 ether);
+        vm.prank(owner);
+        (bool success,) = address(lendingContract).call{value: 1e18}("");
+        require(success, "Transfer Failed");
+        vm.prank(USER);
+        vm.expectRevert(tokenLending.onlyTheOwnerCanCallThisFunction.selector);
+        lendingContract.transferFunds();
+    }
+
+    function testOwnerReceivesContractFunds() public {
+        address owner = lendingContract.getOwnerAddress();
+        myToken = token(lendingContract.getTokenAddress());
+        vm.deal(owner, 10e18);
+        vm.startPrank(owner);
+        (bool success,) = address(lendingContract).call{value: 1e18}("");
+        require(success, "Transfer Failed");
+        lendingContract.transferFunds();
+        assertEq(owner.balance, 10e18);
     }
 }
