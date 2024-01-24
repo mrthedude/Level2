@@ -13,5 +13,5 @@ The main contracts of this repo are:
 
 -   **tokenLendingDeployment.s.sol**: Deployment contract used to deploy both the tokenLending.sol and token.sol contracts 
 
-**test_tokenLending.t.sol**: Tests file for all the above listed contracts and their functionalities
+-   **test_tokenLending.t.sol**: Tests file for all the above listed contracts and their functionalities
 

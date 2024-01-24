@@ -67,7 +67,7 @@ contract tokenLending {
     /**
      * @notice The ERC20 token that this contract facilitates lending for.
      */
-    IERC20 public immutable i_token;
+    IERC20 internal immutable i_token;
 
     event Received(address indexed sender, uint256 indexed value);
     event TransferredFundsToOwner();
@@ -200,11 +200,11 @@ contract tokenLending {
         ownerAddress = address(_owner);
     }
 
-    function getDepositBalance() public view returns (uint256 depositBalance) {
-        depositBalance = _depositBalance[msg.sender];
+    function getDepositBalance(address user) public view returns (uint256 depositBalance) {
+        depositBalance = _depositBalance[user];
     }
 
-    function getBorrowBalance() public view returns (uint256 borrowBalance) {
-        borrowBalance = _borrowBalance[msg.sender];
+    function getBorrowBalance(address user) public view returns (uint256 borrowBalance) {
+        borrowBalance = _borrowBalance[user];
     }
 }

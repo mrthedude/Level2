@@ -8,24 +8,34 @@ import {HelperConfig} from "../script/HelperConfig.s.sol";
 
 contract tokenDeployer is Script {
     HelperConfig helperConfig = new HelperConfig();
-    address addi = helperConfig.getOwnerAddress();
+    address ownerAddi = helperConfig.getOwnerAddress();
 
-    function runToken() public returns (token) {
-        token myToken = new token(addi);
+    function run() public returns (token) {
+        vm.startBroadcast();
+        token myToken = new token(ownerAddi);
+        vm.stopBroadcast();
         return myToken;
     }
 }
 
-contract tokenLendingScript is Script, tokenDeployer {
+contract tokenLendingScript is Script {
     function run() public returns (tokenLending) {
         HelperConfig helperConfig = new HelperConfig();
-        address addi = helperConfig.getOwnerAddress();
-        tokenDeployer deployToken = new tokenDeployer();
+        address ownerAddress = helperConfig.getOwnerAddress();
+        address tokenAddress = 0x1780F615532d0ceA1FBc0Add91d7B9954073BaC6;
         vm.startBroadcast();
-
-        tokenLending lendingContract = new tokenLending(address(deployToken.runToken()), addi);
-
+        tokenLending lendingContract = new tokenLending(tokenAddress, ownerAddress);
         vm.stopBroadcast();
+        return lendingContract;
+    }
+}
+
+contract testTokenLendingScript is Script, tokenDeployer {
+    function testRun() public returns (tokenLending) {
+        HelperConfig helperConfig = new HelperConfig();
+        address ownerAddress = helperConfig.getOwnerAddress();
+        tokenDeployer tokenScript = new tokenDeployer();
+        tokenLending lendingContract = new tokenLending(address(tokenScript.run()), ownerAddress);
         return lendingContract;
     }
 }
